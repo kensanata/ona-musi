@@ -74,4 +74,34 @@ $t->get_ok('/list')
     ->status_is(200)
     ->text_is('ul li a' => 'test'); # no file extension!
 
+# templates/view.html.ep without extension
+$t->get_ok('/view/test')
+    ->status_is(200)
+    ->text_is('h1' => 'This is a test')
+    ->text_is('p' => 'Hello');
+
+# html without extension
+$t->get_ok('/html/test')
+    ->status_is(200)
+    ->text_is('h1' => 'This is a test')
+    ->text_is('p' => 'Hello');
+
+# text without extension
+$t->get_ok('/raw/test')
+    ->status_is(200)
+    ->content_is("# This is a test\n\nHello");
+
+# templates/edit.html.ep without extension
+$t->get_ok('/edit/test')
+    ->status_is(200)
+    ->text_is('textarea' => "# This is a test\n\nHello");
+
+# save without extension
+$t->post_ok('/save/test'
+	    => form
+	    => {content => "# This is a test\n\n¡Hola!"})
+    ->status_is(200)
+    ->text_is('h1' => 'This is a test')
+    ->text_is('p' => '¡Hola!');
+
 done_testing();
