@@ -70,6 +70,13 @@ sub write_page {
   write_text($filename, $text);
 }
 
+sub stale_cache {
+  my ($self, $cache, $page) = @_;
+  my $m1 = (stat($cache))[9] if -f $cache; # mtime
+  my $m2 = (stat($page))[9] if -f $page;   # mtime
+  return $m1 < $m2 if $m1 and $m2;
+}
+
 sub clear_cache {
   my ($self, $id) = @_;
   my $filename = $self->cache_filename($id);
@@ -79,7 +86,8 @@ sub clear_cache {
 sub cached_page {
   my ($self, $id) = @_;
   my $filename = $self->cache_filename($id);
-  return read_text($filename) if -r $filename;
+  my $stale = $self->stale_cache($filename, $self->page_filename($id));
+  return read_text($filename) if -r $filename and not $stale;
   return undef;
 }
 

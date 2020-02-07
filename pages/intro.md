@@ -53,4 +53,4 @@ you want to write BBCode, for example, check out the
 Development
 -----------
 
-There's a [TODO][todo.md] list.
+There's a [TODO](todo.md) list.

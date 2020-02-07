@@ -2,7 +2,7 @@ use Mojo::Base -strict;
 
 use Test::More;
 use Test::Mojo;
-
+use File::Slurper qw(write_text);
 use FindBin;
 BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
 
@@ -116,5 +116,17 @@ $t->post_ok('/save/test.bb'
     ->status_is(200)
     ->text_is('h1' => 'This is a test')
     ->text_is('p' => 'Olá!');
+
+# make sure the cache is considered stale
+sleep(1);
+
+# change file directly ("manually")
+write_text("test-$test/pages/test.md", "# This is a test\n\nSalut!");
+
+# templates/view.html.ep without extension
+$t->get_ok('/view/test')
+    ->status_is(200)
+    ->text_is('h1' => 'This is a test')
+    ->text_is('p' => 'Salut!');
 
 done_testing();
