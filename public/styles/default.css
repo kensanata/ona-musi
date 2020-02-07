@@ -1,0 +1,154 @@
+/* This file is in the public domain. */
+html { text-align: center; }
+
+body {
+    font-family: "DejaVu Serif", Palatino, serif;
+    font-style: normal;
+    font-size: 16pt;
+    padding: 1em 3em;
+    width: 72ex;
+    display: inline-block;
+    text-align: left;
+    color: #111111;
+    background-color: #fffff8;
+    hyphens: auto;
+}
+
+a:link { color: #0000EE }
+a:visited { color: #551A8B }
+a:hover { color: #7a67ee }
+a.number { text-decoration: none }
+
+@media only screen and (max-device-width: 600px) {
+    body {
+	padding: 0;
+	font-size: larger;
+	width: 40ex;
+    }
+    textarea {
+	font-size: inherit;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    body { color: #eeeee8; background-color: #333333; }
+    a:link { color: #1e90ff }
+    a:hover { color: #63b8ff }
+    a:visited { color: #7a67ee }
+    input, input[type="text"], textarea {
+	color: #eeeee8; background-color: #555;
+	padding: 0.5ex;
+	font-size: 80%;
+	line-height: 125%;
+    }
+    div.diff { color: #eeeee8; }
+    div.old { background-color: #cd6600; }
+    div.new { background-color: #458b00; }
+    img { opacity: .75; transition: opacity .5s ease-in-out; }
+    img:hover { opacity: 1; }
+}
+
+@media print {
+    body {
+	font-size: 12pt;
+    }
+}
+
+/* code */
+
+textarea, pre, code, tt {
+    font-family: "DejaVu Mono", "Andale Mono", Monaco, "Courier New", Courier, monospace;
+}
+
+pre, code, tt {
+    font-size: 12pt;
+}
+
+pre {
+    overflow:hidden;
+    white-space: pre-wrap;
+}
+
+/* Edit pages */
+
+textarea { width: 100%; height: 20ex; }
+
+/* Heading. */
+
+h1, h2, h3 {
+    font-family: inherit;
+    font-weight: normal;
+}
+
+h1 {
+    font-size: 32pt;
+    margin: 1em 0 0.5em 0;
+    padding: 0.4em 0;
+}
+
+h2 {
+    font-size: 18pt;
+    margin: 2em 0 0 0;
+    padding: 0;
+}
+
+h3 {
+    font-size: inherit;
+    font-weight: bold;
+    padding: 0;
+    margin: 1em 0 0 0;
+    clear: both;
+}
+
+@media only screen and (max-device-width: 600px) {
+    h1 {
+	margin: 1ex 0;
+	padding: 0;
+    }
+}
+
+/* Color codes for IP number replacements. */
+
+.red {
+    background: red;
+    color: red;
+}
+
+.orange {
+    background: orange;
+    color: orange;
+}
+
+.yellow {
+    background: yellow;
+    color: yellow;
+}
+
+.green {
+    background: green;
+    color: green;
+}
+
+.blue {
+    background: blue;
+    color: blue;
+}
+
+.indigo {
+    background: indigo;
+    color: indigo;
+}
+
+.violet {
+    background: violet;
+    color: violet;
+}
+
+.white {
+    background: white;
+    color: white;
+}
+
+.ip-code {
+    border: 1px solid #666;
+}

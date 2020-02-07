@@ -1,0 +1,11 @@
+% layout 'default';
+<h1>Edit <%= $id %></h1>
+%= form_for save => begin
+%= text_area content => $content
+<p>
+%= submit_button
+% end
+<hr>
+<%= link_to url_for('view', id => $id)->to_abs => begin %>View<% end %>
+<%= link_to url_for('list')->to_abs => begin %>List<% end %>
+<%= link_to url_for('home')->to_abs => begin %>Home<% end %>

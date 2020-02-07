@@ -1,0 +1,8 @@
+% layout 'default';
+<h1>All Pages</h1>
+<ul>
+% for my $id (@$ids) {
+<li><%= link_to url_for('view', id => $id)->to_abs => begin %><%= $id %><% end %></li>
+% }
+</ul>
+<hr>
