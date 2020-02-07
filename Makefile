@@ -1,5 +1,5 @@
 demo:
-	morbo script/oddmuse
+	morbo script/ona-musi
 
 test:
 	find . -name '*.pm' -exec perl -c {} \;
