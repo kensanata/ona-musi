@@ -5,18 +5,25 @@ use File::Slurper qw(read_text write_text);
 
 sub new { bless {}, shift }
 
-our $dir = "pages";
+my $page_dir = "pages";
+my $cache_dir = "html";
 
-sub dir {
+sub page_dir {
   my ($self, $val) = @_;
-  $dir = $val if defined $val;
-  return $dir;
+  $page_dir = $val if defined $val;
+  return $page_dir;
+}
+
+sub cache_dir {
+  my ($self, $val) = @_;
+  $cache_dir = $val if defined $val;
+  return $cache_dir;
 }
 
 sub pages {
   my ($self) = @_;
   my @ids;
-  if (opendir my $d, $dir) {
+  if (opendir my $d, $page_dir) {
     @ids = sort
 	map { s/\.[a-z]+$//; $_ }
 	grep { $_ ne '.' and $_ ne '..' and $_ !~ /~$/ } readdir $d;
@@ -26,12 +33,25 @@ sub pages {
 
 sub page_filename {
   my ($self, $id) = @_;
-  return "$dir/$id" if -r "$dir/$id"; # return exact matches
-  for (glob "$dir/$id.*") { # find matches with an extension
-    return $_ if /$dir\/$id\.[a-z]+$/ and -f;
+  return "$page_dir/$id" if -r "$page_dir/$id"; # return exact matches
+  for (glob "$page_dir/$id.*") { # find matches with an extension
+    return $_ if /$page_dir\/$id\.[a-z]+$/ and -f;
   }
-  return "$dir/$id" if $id =~ /\.[a-z]+$/; # a new file with an extension
-  return "$dir/$id.md"; # if it doesn't have an extension, make it markdown
+  my $original_id = $id; # make a copy for later
+  if ($id =~ s/\.[a-z]+$//) { # perhaps if we strip the extension
+    return "$page_dir/$id" if -r "$page_dir/$id"; # return exact matches
+    for (glob "$page_dir/$id.*") { # find matches with an extension
+      return $_ if /$page_dir\/$id\.[a-z]+$/ and -f;
+    }
+    return "$page_dir/$original_id"; # a new file with an extension
+  }
+  return "$page_dir/$id.md"; # if it doesn't have an extension, make it markdown
+}
+
+sub cache_filename {
+  my ($self, $id) = @_;
+  $id =~ s/\.[a-z]+$//; # strip the extension
+  return "$cache_dir/$id.html"; # use HTML
 }
 
 sub read_page {
@@ -43,8 +63,32 @@ sub read_page {
 
 sub write_page {
   my ($self, $id, $text) = @_;
+  $self->clear_cache($id);
   my $filename = $self->page_filename($id);
+  # needs lock
+  mkdir $page_dir, 0775;
   write_text($filename, $text);
+}
+
+sub clear_cache {
+  my ($self, $id) = @_;
+  my $filename = $self->cache_filename($id);
+  unlink $filename;
+}
+
+sub cached_page {
+  my ($self, $id) = @_;
+  my $filename = $self->cache_filename($id);
+  return read_text($filename) if -r $filename;
+  return undef;
+}
+
+sub cache_page {
+  my ($self, $id, $html) = @_;
+  my $filename = $self->cache_filename($id);
+  # needs lock
+  mkdir $cache_dir, 0775;
+  write_text($filename, $html);
 }
 
 1;
