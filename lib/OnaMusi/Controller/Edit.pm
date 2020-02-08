@@ -40,6 +40,21 @@ sub edit {
   $c->render(template => 'edit', content => $text);
 }
 
+
+=item C<delete>
+
+This deletes the page named by the C<id> parameter from storage and uses the
+C<view.html.ep> template to allow users to recreate it.
+
+=cut
+
+sub delete {
+  my $c = shift;
+  my $id = $c->param('id');
+  $c->storage->delete_page($id);
+  $c->redirect_to('view', id => $id);
+}
+
 =item C<save>
 
 This writes the page named by the C<id> parameter to storage. It's content is

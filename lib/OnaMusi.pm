@@ -63,13 +63,14 @@ sub startup {
 
   # Router
   my $r = $self->routes;
-  $r->get('/' => sub {my $c = shift; $c->redirect_to('list')})->name('home');
+  $r->get('/' => sub {my $c = shift; $c->redirect_to('/page/home')})->name('home');
   $r->get('/list')->to(controller => 'search', action => 'list')->name('list');
   $r->get('/html/#id')->to(controller => 'view', action => 'html')->name('html');
   $r->get('/raw/#id')->to(controller => 'view', action => 'raw')->name('raw');
-  $r->get('/view/#id')->to(controller => 'view', action => 'view')->name('view');
+  $r->get('/page/#id')->to(controller => 'view', action => 'view')->name('view');
   $r->get('/edit/#id')->to(controller => 'edit', action => 'edit')->name('edit');
-  $r->post('/save/#id')->to(controller => 'edit', action => 'save')->name('save');
+  $r->delete('/page/#id')->to(controller => 'edit', action => 'delete')->name('delete');
+  $r->post('/page/#id')->to(controller => 'edit', action => 'save')->name('save');
 }
 
 1;

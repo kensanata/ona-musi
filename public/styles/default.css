@@ -73,6 +73,16 @@ pre {
 
 textarea { width: 100%; height: 20ex; }
 
+form {
+    display: inline;
+}
+input[type="submit"][value="Save"] {
+    display: inline;
+}
+input[type="submit"][value="Delete"] {
+    display: inline;
+}
+
 /* Heading. */
 
 h1, h2, h3 {

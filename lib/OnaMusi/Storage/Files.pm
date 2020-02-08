@@ -164,6 +164,19 @@ sub cache_page {
   write_text($filename, $html);
 }
 
+=item C<delete_page>
+
+Deletes the page and its cached copy.
+
+=cut
+
+sub delete_page {
+  my ($self, $id) = @_;
+  $self->clear_cache($id);
+  my $filename = $self->page_filename($id);
+  unlink $filename if -f $filename;
+}
+
 =back
 
 =cut

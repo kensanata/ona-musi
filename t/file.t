@@ -51,4 +51,11 @@ ok(-f "test-$test/html-x/test-x.html", "cache was written");
 
 is($t->app->storage->cached_page('test-x'), 'this is cached', "cache was read");
 
+# deleting
+
+$t->app->storage->delete_page('test-x');
+
+ok(! -e "test-$test/pages-x/test-x.md", "file was deleted");
+ok(! -e "test-$test/html-x/test-x.html", "cache was deleted");
+
 done_testing;
