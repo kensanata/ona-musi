@@ -16,8 +16,16 @@
 
 =head1 OnaMusi::Storage::Files
 
-Ona Musi is a wiki. By default, it stores its data in files. This class provides
-all the functionality for it.
+Ona Musi is a wiki. By default, it stores its data in files. The directories
+used can be set in the following ways:
+
+C<pages> is the directory where page files are stored.
+The key C<pages_dir> in the config file can be used to change it.
+The environment variable C<ONA_MUSI_PAGES_DIR> can be used to override it.
+
+C<html> is the directory where cached HTML is stored.
+The key C<cache_dir> in the config file can be used to change it.
+The environment variable C<ONA_MUSI_HTML_DIR> can be used to override it.
 
 =over
 
@@ -28,33 +36,23 @@ package OnaMusi::Storage::Files;
 use Modern::Perl '2018';
 use File::Slurper qw(read_text write_text);
 
-sub new { bless {}, shift }
-
-my $page_dir = "pages";
-my $cache_dir = "html";
-
-=item C<page_dir>
-
-Get or set the directory where pages are stored. Defaults to C<pages>.
-
-=cut
-
-sub page_dir {
-  my ($self, $val) = @_;
-  $page_dir = $val if defined $val;
-  return $page_dir;
+sub new {
+  my ($class, $config) = @_;
+  my $self = {};
+  bless $self, $class;
+  $self->init($config);
+  return $self;
 }
 
-=item C<cache_dir>
+my $pages_dir = "pages";
+my $cache_dir = "html";
 
-Get or set the directory where HTML files are stored. Defaults to C<html>.
-
-=cut
-
-sub cache_dir {
-  my ($self, $val) = @_;
-  $cache_dir = $val if defined $val;
-  return $cache_dir;
+sub init {
+  my ($self, $config) = @_;
+  $pages_dir = $config->{pages_dir} if $config->{pages_dir};
+  $cache_dir = $config->{cache_dir} if $config->{cache_dir};
+  $pages_dir = $ENV{ONA_MUSI_PAGES_DIR} if $ENV{ONA_MUSI_PAGES_DIR};
+  $cache_dir = $ENV{ONA_MUSI_HTML_DIR} if $ENV{ONA_MUSI_HTML_DIR};
 }
 
 =item C<pages>
@@ -66,7 +64,7 @@ Get a reference to a list of all the page names.
 sub pages {
   my ($self) = @_;
   my @ids;
-  if (opendir my $d, $page_dir) {
+  if (opendir my $d, $pages_dir) {
     @ids = sort
 	map { s/\.[a-z]+$//; $_ }
 	grep { $_ ne '.' and $_ ne '..' and $_ !~ /~$/ } readdir $d;
@@ -76,19 +74,19 @@ sub pages {
 
 sub page_filename {
   my ($self, $id) = @_;
-  return "$page_dir/$id" if -r "$page_dir/$id"; # return exact matches
-  for (glob "$page_dir/$id.*") { # find matches with an extension
-    return $_ if /$page_dir\/$id\.[a-z]+$/ and -f;
+  return "$pages_dir/$id" if -r "$pages_dir/$id"; # return exact matches
+  for (glob "$pages_dir/$id.*") { # find matches with an extension
+    return $_ if /$pages_dir\/$id\.[a-z]+$/ and -f;
   }
   my $original_id = $id; # make a copy for later
   if ($id =~ s/\.[a-z]+$//) { # perhaps if we strip the extension
-    return "$page_dir/$id" if -r "$page_dir/$id"; # return exact matches
-    for (glob "$page_dir/$id.*") { # find matches with an extension
-      return $_ if /$page_dir\/$id\.[a-z]+$/ and -f;
+    return "$pages_dir/$id" if -r "$pages_dir/$id"; # return exact matches
+    for (glob "$pages_dir/$id.*") { # find matches with an extension
+      return $_ if /$pages_dir\/$id\.[a-z]+$/ and -f;
     }
-    return "$page_dir/$original_id"; # a new file with an extension
+    return "$pages_dir/$original_id"; # a new file with an extension
   }
-  return "$page_dir/$id.md"; # if it doesn't have an extension, make it markdown
+  return "$pages_dir/$id.md"; # if it doesn't have an extension, make it markdown
 }
 
 sub cache_filename {
@@ -121,7 +119,7 @@ sub write_page {
   $self->clear_cache($id);
   my $filename = $self->page_filename($id);
   # needs lock
-  mkdir $page_dir, 0775;
+  mkdir $pages_dir, 0775;
   write_text($filename, $text);
 }
 

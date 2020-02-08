@@ -10,14 +10,10 @@ my $t = Test::Mojo->new('OnaMusi');
 
 my $test = int(rand(1000));
 diag "test-$test";
-
-is($t->app->storage->page_dir("test-$test/pages"), "test-$test/pages",
-   "page directory changed to 'test-$test/pages'");
-
-is($t->app->storage->cache_dir("test-$test/html"), "test-$test/html",
-   "cache directory changed to 'test-$test/html'");
-
 mkdir "test-$test";
+
+$ENV{ONA_MUSI_PAGES_DIR} = "test-$test/pages";
+$ENV{ONA_MUSI_HTML_DIR} = "test-$test/html";
 
 $t->get_ok('/')
     ->status_is(302);

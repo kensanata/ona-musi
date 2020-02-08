@@ -58,8 +58,8 @@ sub startup {
   eval "require $config->{markup}";
 
   # Helper to lazy initialize and store our model object.
-  $self->helper(storage => sub { state $storage = $config->{storage}->new });
-  $self->helper(markup => sub { state $render = $config->{markup}->new });
+  $self->helper(storage => sub { state $storage = $config->{storage}->new($config) });
+  $self->helper(markup => sub { state $render = $config->{markup}->new($config) });
 
   # Router
   my $r = $self->routes;
