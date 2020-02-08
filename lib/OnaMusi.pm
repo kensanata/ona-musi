@@ -1,3 +1,46 @@
+# Ona Musi is a wiki engine
+# Copyright (C) 2020  Alex Schroeder <alex@gnu.org>
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Affero General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+# for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+=head1 OnaMusi
+
+Ona Musi is a wiki. OnaMusi is a L<Mojolicious> application. On startup, it
+reads the config file and sets up all the routes.
+
+See L<Mojolicious::Guides::Routing> for more information about routing.
+
+See L<Mojolicious::Plugin::Config> for more information about the config file.
+
+Important keys in the config file:
+
+=over
+
+=item C<storage> names a class that does storage
+
+=item C<markup> names a class that handles markup
+
+=back
+
+See L<OnaMusi::Storage::Files> for the default implementation which stores all
+the info as files.
+
+See L<Text::Markup> for the default implementation which converts the text
+people write to HTML.
+
+=cut
+
 package OnaMusi;
 use Mojo::Base 'Mojolicious';
 use Text::Markup;
