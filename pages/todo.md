@@ -7,3 +7,6 @@ TODO
 - rollback
 - questions
 - banned regular expressions
+- tags
+- journal pages
+
