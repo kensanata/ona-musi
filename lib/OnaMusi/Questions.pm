@@ -84,10 +84,10 @@ sub ask {
 
   my $input = $c->cookie('answer');
   # the correct answer was found in the cookie
-  return 1 if $input and $input =~ /$answer/;
+  return 1 if $input and $input =~ /$answer/i;
 
   $input = $c->param('answer');
-  if ($input and $input =~ /$answer/) {
+  if ($input and $input =~ /$answer/i) {
     # store the correct answer in the cookie
     $c->cookie('answer', $input);
     return 1;
