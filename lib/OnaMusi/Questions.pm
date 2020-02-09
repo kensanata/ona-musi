@@ -93,7 +93,6 @@ sub ask {
     return 1;
   }
 
-  warn "question\n";
   $c->render(template => 'question',
 	     question => $question,
 	     action => $c->current_route,
