@@ -6,22 +6,17 @@ use Test::Mojo;
 use FindBin;
 BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
 
-my $t = Test::Mojo->new('OnaMusi');
-
 my $test = int(rand(1000));
 diag "test-$test";
 mkdir "test-$test";
 
-my $config = $t->app->plugin('Config');
-
-$config->{pages_dir} = "test-$test/pages";
-$config->{cache_dir} = "test-$test/html";
-
-$config->{question} = 'Name a colour of the rainbow!';
-$config->{answer} = '\b(red|orange|yellow|green|blue|indigo|violet)\b';
-
-$t->app->storage->init($config);
-$t->app->question->init($config);
+my $t = Test::Mojo->new('OnaMusi', {
+  storage => 'OnaMusi::Storage::Files',
+  markup => 'Text::Markup',
+  pages_dir => "test-$test/pages",
+  cache_dir => "test-$test/html",
+  question => 'Name a colour of the rainbow!',
+  answer => '\b(red|orange|yellow|green|blue|indigo|violet)\b' });
 
 $t->ua->max_redirects(1);
 

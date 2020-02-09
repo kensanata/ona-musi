@@ -1,12 +1,12 @@
 TODO
 ====
 
-- usernames and passwords
+- git backend
 - recent changes
 - page history
 - rollback
-- questions
-- banned regular expressions
 - tags
 - journal pages
+- banned regular expressions
+- usernames and passwords
 

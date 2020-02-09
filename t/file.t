@@ -33,11 +33,11 @@ delete $ENV{ONA_MUSI_PAGES_DIR};
 delete $ENV{ONA_MUSI_HTML_DIR};
 
 # test config
-
-my $config = $t->app->plugin('Config');
-$config->{pages_dir} = "test-$test/pages-x";
-$config->{cache_dir} = "test-$test/html-x";
-$t->app->storage->init($config);
+$t = Test::Mojo->new('OnaMusi', {
+  storage => 'OnaMusi::Storage::Files',
+  markup => 'Text::Markup',
+  pages_dir => "test-$test/pages-x",
+  cache_dir => "test-$test/html-x" });
 
 $t->app->storage->write_page('test-x', 'this is a test');
 

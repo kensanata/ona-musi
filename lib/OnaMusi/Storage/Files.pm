@@ -32,28 +32,13 @@ The environment variable C<ONA_MUSI_HTML_DIR> can be used to override it.
 =cut
 
 package OnaMusi::Storage::Files;
-
+use Mojo::Base -base;
 use Modern::Perl '2018';
 use File::Slurper qw(read_text write_text);
 
-sub new {
-  my ($class, $config) = @_;
-  my $self = {};
-  bless $self, $class;
-  $self->init($config);
-  return $self;
-}
-
-my $pages_dir = "pages";
-my $cache_dir = "html";
-
-sub init {
-  my ($self, $config) = @_;
-  $pages_dir = $config->{pages_dir} if $config->{pages_dir};
-  $cache_dir = $config->{cache_dir} if $config->{cache_dir};
-  $pages_dir = $ENV{ONA_MUSI_PAGES_DIR} if $ENV{ONA_MUSI_PAGES_DIR};
-  $cache_dir = $ENV{ONA_MUSI_HTML_DIR} if $ENV{ONA_MUSI_HTML_DIR};
-}
+has 'config';
+has 'pages_dir' => sub { $ENV{ONA_MUSI_PAGES_DIR} or shift->config->{pages_dir} or "pages" };
+has 'cache_dir' => sub { $ENV{ONA_MUSI_HTML_DIR} or shift->config->{cache_dir} or "html" };
 
 =item C<pages>
 
@@ -64,7 +49,7 @@ Get a reference to a list of all the page names.
 sub pages {
   my ($self) = @_;
   my @ids;
-  if (opendir my $d, $pages_dir) {
+  if (opendir my $d, $self->pages_dir) {
     @ids = sort
 	map { s/\.[a-z]+$//; $_ }
 	grep { $_ ne '.' and $_ ne '..' and $_ !~ /~$/ } readdir $d;
@@ -74,25 +59,26 @@ sub pages {
 
 sub page_filename {
   my ($self, $id) = @_;
-  return "$pages_dir/$id" if -r "$pages_dir/$id"; # return exact matches
-  for (glob "$pages_dir/$id.*") { # find matches with an extension
-    return $_ if /$pages_dir\/$id\.[a-z]+$/ and -f;
+  my $dir = $self->pages_dir;
+  return "$dir/$id" if -r "$dir/$id"; # return exact matches
+  for (glob "$dir/$id.*") { # find matches with an extension
+    return $_ if /$dir\/$id\.[a-z]+$/ and -f;
   }
   my $original_id = $id; # make a copy for later
   if ($id =~ s/\.[a-z]+$//) { # perhaps if we strip the extension
-    return "$pages_dir/$id" if -r "$pages_dir/$id"; # return exact matches
-    for (glob "$pages_dir/$id.*") { # find matches with an extension
-      return $_ if /$pages_dir\/$id\.[a-z]+$/ and -f;
+    return "$dir/$id" if -r "$dir/$id"; # return exact matches
+    for (glob "$dir/$id.*") { # find matches with an extension
+      return $_ if /$dir\/$id\.[a-z]+$/ and -f;
     }
-    return "$pages_dir/$original_id"; # a new file with an extension
+    return "$dir/$original_id"; # a new file with an extension
   }
-  return "$pages_dir/$id.md"; # if it doesn't have an extension, make it markdown
+  return "$dir/$id.md"; # if it doesn't have an extension, make it markdown
 }
 
 sub cache_filename {
   my ($self, $id) = @_;
   $id =~ s/\.[a-z]+$//; # strip the extension
-  return "$cache_dir/$id.html"; # use HTML
+  return $self->cache_dir . "/$id.html"; # use HTML
 }
 
 =item C<read_page>
@@ -119,7 +105,7 @@ sub write_page {
   $self->clear_cache($id);
   my $filename = $self->page_filename($id);
   # needs lock
-  mkdir $pages_dir, 0775;
+  mkdir $self->pages_dir, 0775;
   write_text($filename, $text);
 }
 
@@ -160,7 +146,7 @@ sub cache_page {
   my ($self, $id, $html) = @_;
   my $filename = $self->cache_filename($id);
   # needs lock
-  mkdir $cache_dir, 0775;
+  mkdir $self->cache_dir, 0775;
   write_text($filename, $html);
 }
 
