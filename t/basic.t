@@ -12,18 +12,25 @@ my $test = int(rand(1000));
 diag "test-$test";
 mkdir "test-$test";
 
-$ENV{ONA_MUSI_PAGES_DIR} = "test-$test/pages";
-$ENV{ONA_MUSI_HTML_DIR} = "test-$test/html";
+my $config = $t->app->plugin('Config');
+
+$config->{pages_dir} = "test-$test/pages";
+$config->{cache_dir} = "test-$test/html";
+# no security questions
+$config->{question} = undef;
+$config->{answer} = undef;
+
+$t->app->storage->init($config);
+$t->app->question->init($config);
 
 $t->get_ok('/')
     ->status_is(302);
 
 $t->ua->max_redirects(1);
 
-# templates/list.html.ep
+# templates/view.html.ep but the 'home' page doesn't exist
 $t->get_ok('/')
-    ->status_is(200)
-    ->text_is('h1' => 'All Pages');
+    ->status_is(404);
 
 # public/help.html
 $t->get_ok('/help.html')
@@ -35,16 +42,16 @@ $t->get_ok('/edit/test.md')
     ->status_is(200)
     ->text_is('h1' => 'Edit test.md');
 
-# save
-$t->post_ok('/save/test.md'
+# save with diagnosis example
+$t->post_ok('/page/test.md'
 	    => form
 	    => {content => "# This is a test\n\nHello!"})
-    ->status_is(200)
+    ->status_is(200)->or(sub { diag $t->tx->res->dom->all_text })
     ->text_is('h1' => 'This is a test')
     ->text_is('p' => 'Hello!');
 
-# templates/view.html.ep
-$t->get_ok('/view/test.md')
+# templates/page.html.ep
+$t->get_ok('/page/test.md')
     ->status_is(200)
     ->text_is('h1' => 'This is a test')
     ->text_is('p' => 'Hello!');
@@ -70,8 +77,8 @@ $t->get_ok('/list')
     ->status_is(200)
     ->text_is('ul li a' => 'test'); # no file extension!
 
-# templates/view.html.ep without extension
-$t->get_ok('/view/test')
+# templates/page.html.ep without extension
+$t->get_ok('/page/test')
     ->status_is(200)
     ->text_is('h1' => 'This is a test')
     ->text_is('p' => 'Hello!');
@@ -93,7 +100,7 @@ $t->get_ok('/edit/test')
     ->text_is('textarea' => "# This is a test\n\nHello!");
 
 # save without extension
-$t->post_ok('/save/test'
+$t->post_ok('/page/test'
 	    => form
 	    => {content => "# This is a test\n\n¡Hola!"})
     ->status_is(200)
@@ -106,7 +113,7 @@ $t->get_ok('/edit/test.bb')
     ->text_is('textarea' => "# This is a test\n\n¡Hola!");
 
 # save with the wrong extension (still markdown!)
-$t->post_ok('/save/test.bb'
+$t->post_ok('/page/test.bb'
 	    => form
 	    => {content => "# This is a test\n\nOlá!"})
     ->status_is(200)
@@ -119,8 +126,8 @@ sleep(1);
 # change file directly ("manually")
 write_text("test-$test/pages/test.md", "# This is a test\n\nSalut!");
 
-# templates/view.html.ep without extension
-$t->get_ok('/view/test')
+# templates/page.html.ep without extension
+$t->get_ok('/page/test')
     ->status_is(200)
     ->text_is('h1' => 'This is a test')
     ->text_is('p' => 'Salut!');

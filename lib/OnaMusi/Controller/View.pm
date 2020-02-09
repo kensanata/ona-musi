@@ -73,14 +73,15 @@ sub view {
   if (-f $filename) {
     $cache = $c->storage->cached_page($id);
     $html = $cache || $c->markup->parse(file => $filename);
+    utf8::decode($html);
+    $c->storage->cache_page($id, $html) unless $cache;
+    $html =~ s/<\/?(html|body|head|meta .*)>\s*//g;
+    $c->render(template => 'view', content => $html);
   } else {
     my $url = $c->url_for("/edit/$id");
     $html = qq{<p>This page does not exist but you can <a href="$url">create it</a> now, if you want.};
+    $c->render(template => 'view', content => $html, status => 404);
   }
-  utf8::decode($html);
-  $c->storage->cache_page($id, $html) unless $cache;
-  $html =~ s/<\/?(html|body|head|meta .*)>\s*//g;
-  $c->render(template => 'view', content => $html);
 }
 
 =back
