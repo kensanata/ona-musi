@@ -50,9 +50,10 @@ sub pages {
   my ($self) = @_;
   my @ids;
   if (opendir my $d, $self->pages_dir) {
+    # skip dot files and Emacs backup files, without extensions
     @ids = sort
 	map { s/\.[a-z]+$//; $_ }
-	grep { $_ ne '.' and $_ ne '..' and $_ !~ /~$/ } readdir $d;
+    	grep { $_ !~ /^\./ and $_ !~ /~$/ } readdir $d;
   }
   return \@ids;
 }
@@ -60,6 +61,7 @@ sub pages {
 sub page_filename {
   my ($self, $id) = @_;
   my $dir = $self->pages_dir;
+  $id =~ s/^\.+//; # strip leading dots
   return "$dir/$id" if -r "$dir/$id"; # return exact matches
   for (glob "$dir/$id.*") { # find matches with an extension
     return $_ if /$dir\/$id\.[a-z]+$/ and -f;
@@ -77,6 +79,7 @@ sub page_filename {
 
 sub cache_filename {
   my ($self, $id) = @_;
+  $id =~ s/^\.+//; # strip leading dots
   $id =~ s/\.[a-z]+$//; # strip the extension
   return $self->cache_dir . "/$id.html"; # use HTML
 }
