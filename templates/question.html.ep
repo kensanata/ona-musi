@@ -1,0 +1,26 @@
+% layout 'default';
+<h1>First time editor? Welcome!</h1>
+
+<p>
+	When you edit a page on this wiki for the first time, you are asked
+	to answer a question in order to keep spammers away. Once you've
+	answered the question, a cookie makes sure that you don't have to
+	answer again. If you change device or browser, you have to answer
+	the question again, as cookies are stored by browsers.
+
+%= form_for $action => begin
+%= hidden_field id => $id
+%= hidden_field content => $content
+
+<p>
+%= $question
+<p>
+%= label_for answer => "Answer"
+%= text_field "answer"
+%= submit_button "Ok"
+% end
+
+<hr>
+<%= link_to url_for('view', id => $id)->to_abs => begin %>View<% end %>
+<%= link_to url_for('list')->to_abs => begin %>List<% end %>
+<%= link_to url_for('home')->to_abs => begin %>Home<% end %>

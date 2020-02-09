@@ -60,6 +60,7 @@ sub startup {
   # Helper to lazy initialize and store our model object.
   $self->helper(storage => sub { state $storage = $config->{storage}->new($config) });
   $self->helper(markup => sub { state $render = $config->{markup}->new($config) });
+  $self->helper(question => sub { require OnaMusi::Questions; state $question = OnaMusi::Questions->new($config) });
 
   # Router
   my $r = $self->routes;
@@ -69,8 +70,10 @@ sub startup {
   $r->get('/raw/#id')->to(controller => 'view', action => 'raw')->name('raw');
   $r->get('/page/#id')->to(controller => 'view', action => 'view')->name('view');
   $r->get('/edit/#id')->to(controller => 'edit', action => 'edit')->name('edit');
-  $r->delete('/page/#id')->to(controller => 'edit', action => 'delete')->name('delete');
-  $r->post('/page/#id')->to(controller => 'edit', action => 'save')->name('save');
+
+  my $question_answered = $r->under(sub { $self->app->question->ask(@_) });
+  $question_answered->delete('/page/#id')->to(controller => 'edit', action => 'delete')->name('delete');
+  $question_answered->post('/page/#id')->to(controller => 'edit', action => 'save')->name('save');
 }
 
 1;

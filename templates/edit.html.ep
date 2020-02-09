@@ -1,6 +1,7 @@
 % layout 'default';
 <h1>Edit <%= $id %></h1>
 %= form_for save => begin
+%= hidden_field id => $id
 %= text_area content => $content
 
 %= submit_button "Save"
