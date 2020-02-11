@@ -33,12 +33,37 @@ The environment variable C<ONA_MUSI_HTML_DIR> can be used to override it.
 
 package OnaMusi::Storage::Files;
 use Mojo::Base -base;
+use Mojo::IOLoop;
 use Modern::Perl '2018';
 use File::Slurper qw(read_text write_text);
 
 has 'config';
 has 'pages_dir' => sub { $ENV{ONA_MUSI_PAGES_DIR} or shift->config->{pages_dir} or "pages" };
 has 'cache_dir' => sub { $ENV{ONA_MUSI_HTML_DIR} or shift->config->{cache_dir} or "html" };
+sub with_locked_file {
+  my ($filename, $code) = @_;
+  my $lock = "$filename.lock";
+  # try creating a lock and run the code
+  if (mkdir $lock) {
+    $code->();
+    rmdir($lock);
+  } else {
+    # if that didn't work, try again every second
+    my ($id, $id2);
+    $id = Mojo::IOLoop->recurring(
+      1 => sub {
+	if (mkdir $lock) {
+	  $code->();
+	  rmdir $lock;
+	  Mojo::IOLoop->remove($id);
+	  Mojo::IOLoop->remove($id2);
+	}
+      });
+    # also make sure there's a lock removal just in case
+    $id2 = Mojo::IOLoop->timer(5 => sub { unlink($lock) });
+    Mojo::IOLoop->start;
+  };
+}
 
 =item C<pages>
 
@@ -109,7 +134,7 @@ sub write_page {
   my $filename = $self->page_filename($id);
   # needs lock
   mkdir $self->pages_dir, 0775;
-  write_text($filename, $text);
+  with_locked_file($filename, sub { write_text($filename, $text) });
 }
 
 sub stale_cache {
@@ -150,7 +175,7 @@ sub cache_page {
   my $filename = $self->cache_filename($id);
   # needs lock
   mkdir $self->cache_dir, 0775;
-  write_text($filename, $html);
+  with_locked_file($filename, sub { write_text($filename, $html) });
 }
 
 =item C<delete_page>
