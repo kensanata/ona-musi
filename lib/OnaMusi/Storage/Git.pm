@@ -38,14 +38,10 @@ package OnaMusi::Storage::Git;
 use Mojo::Base 'OnaMusi::Storage::Files';
 use Modern::Perl '2018';
 use Git;
-use Cwd;
 
 has 'repo' => sub {
-  my $dir = getcwd;
-  chdir $self->pages_dir;
-  my $repo = Git->repository;
-  chdir $dir;
-  return $repo;
+  my $self = shift;
+  return Git->repository(WorkingCopy => $self->pages_dir);
 };
 
 =item C<write_page>
@@ -69,12 +65,9 @@ See L<Git> for the module handling the calls to C<git>.
 sub write_page {
   my ($self, $id, $text) = @_;
   $self->SUPER::write_page($id, $text);
-  my $dir = getcwd;
-  chdir $self->pages_dir;
-  $self->repo->command_noisy('init') unless -d "/.git";
+  $self->repo->command_noisy('init') unless -d $self->pages_dir . "/.git";
   $self->repo->command_noisy('add', $self->pages_dir);
   $self->repo->command_noisy('commit', "--message=Edit $id");
-  chdir $dir;
 }
 
 =item C<delete_page>
@@ -94,11 +87,8 @@ After calling C<delete_page>, the following C<git> commands are executed:
 sub delete_page {
   my ($self, $id) = @_;
   $self->SUPER::delete_page($id);
-  my $dir = getcwd;
-  chdir $self->pages_dir;
   $self->repo->command_noisy('rm', $self->page_filename($id));
   $self->repo->command_noisy('commit', "--message=Delete $id");
-  chdir $dir;
 }
 
 =back

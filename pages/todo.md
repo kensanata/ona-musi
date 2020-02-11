@@ -1,7 +1,6 @@
 TODO
 ====
 
-- git backend
 - recent changes
 - page history
 - rollback
