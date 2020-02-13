@@ -16,8 +16,8 @@
 
 =head1 OnaMusi::Storage::Files
 
-Ona Musi is a wiki. By default, it stores its data in files. The directories
-used can be set in the following ways:
+Ona Musi is a wiki. By default, it stores its data in files. The following
+properties can be set:
 
 C<pages> is the directory where page files are stored.
 The key C<pages_dir> in the config file can be used to change it.
@@ -26,6 +26,10 @@ The environment variable C<ONA_MUSI_PAGES_DIR> can be used to override it.
 C<html> is the directory where cached HTML is stored.
 The key C<cache_dir> in the config file can be used to change it.
 The environment variable C<ONA_MUSI_HTML_DIR> can be used to override it.
+
+C<changes.log> is the file where changes are logged.
+The key C<log_file> in the config file can be used to change it.
+The environment variable C<ONA_MUSI_LOG_FILE> can be used to override it.
 
 =over
 
@@ -40,6 +44,9 @@ use File::Slurper qw(read_text write_text);
 has 'config';
 has 'pages_dir' => sub { $ENV{ONA_MUSI_PAGES_DIR} or shift->config->{pages_dir} or "pages" };
 has 'cache_dir' => sub { $ENV{ONA_MUSI_HTML_DIR} or shift->config->{cache_dir} or "html" };
+has 'log_file' => sub { $ENV{ONA_MUSI_LOG_FILE} or shift->config->{log_file} or "changes.log" };
+has 'fs' => "\x1e"; # ASCII field separator
+
 sub with_locked_file {
   my ($filename, $code) = @_;
   my $lock = "$filename.lock";
@@ -61,7 +68,7 @@ sub with_locked_file {
       });
     # also make sure there's a lock removal just in case
     $id2 = Mojo::IOLoop->timer(5 => sub { unlink($lock) });
-    Mojo::IOLoop->start;
+    Mojo::IOLoop->start unless Mojo::IOLoop->is_running;
   };
 }
 
@@ -129,12 +136,13 @@ Write the content of a page.
 =cut
 
 sub write_page {
-  my ($self, $id, $text) = @_;
+  my ($self, $id, $text, $change) = @_;
   $self->clear_cache($id);
   my $filename = $self->page_filename($id);
   # needs lock
   mkdir $self->pages_dir, 0775;
   with_locked_file($filename, sub { write_text($filename, $text) });
+  $self->write_change($change) if defined $change;
 }
 
 sub stale_cache {
@@ -189,6 +197,29 @@ sub delete_page {
   $self->clear_cache($id);
   my $filename = $self->page_filename($id);
   unlink $filename if -f $filename;
+}
+
+=item C<write_change>
+
+Write an L<OnaMusi::Change> to the log file.
+
+=cut
+
+sub write_change {
+  my ($self, $change) = @_;
+  with_locked_file $self->log_file, sub {
+    open(my $fh, ">>:encoding(UTF-8)", $self->log_file)
+	or die "Cannot append to log file " . $self->log_file . ": $!";
+    print $fh join($self->fs,
+		   $change->ts,
+		   $change->id,
+		   $change->revision,
+		   $change->minor ? 1 : 0,
+		   $change->author,
+		   $change->code,
+		   $change->summary) . "\n";
+    close($fh);
+  };
 }
 
 =back

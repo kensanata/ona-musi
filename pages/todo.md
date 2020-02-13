@@ -1,7 +1,9 @@
 TODO
 ====
 
-- recent changes
+- extracting recent changes from log file
+- extracting recent changes from git log
+- displaying changes template
 - page history
 - rollback
 - tags

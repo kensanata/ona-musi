@@ -25,6 +25,8 @@ actions:
 
 package OnaMusi::Controller::Edit;
 use Mojo::Base 'Mojolicious::Controller';
+use OnaMusi::Change;
+use B;
 
 =item C<edit>
 
@@ -68,8 +70,18 @@ sub save {
   my $id = $c->param('id');
   my $text = $c->param('content');
   $text =~ s/\r\n/\n/g; # use regular EOL convention
-  $c->storage->write_page($id, $text);
+  my $change = OnaMusi::Change->new(
+    ts => time, id => $id,
+    code => code($c));
+  $c->storage->write_page($id, $text, $change);
   $c->redirect_to('view', id => $id);
+}
+
+sub code {
+  my $c = shift;
+  my $hash = unpack("L",B::hash($c->tx->remote_address));
+  my $octal = sprintf("%o", $hash); # octal is 0-7
+  return substr($octal, 0, 4); # first four digits
 }
 
 =back
