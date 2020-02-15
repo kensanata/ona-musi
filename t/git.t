@@ -17,7 +17,7 @@ my $t = Test::Mojo->new('OnaMusi', {
   pages_dir => "$dir/pages",
   cache_dir => "$dir/html" });
 
-$t->app->storage->write_page('test', 'this is a test');
+$t->app->storage->write_page('test', 'md', 'this is a test');
 
 ok(-f "$dir/pages/test.md", "file was written");
 

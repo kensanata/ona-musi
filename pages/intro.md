@@ -42,7 +42,7 @@ extension using [Text::Markup][tm1]. To find the supported markup
 languages, [search CPAN for the Text::Markup distribution][tm2]. If
 you want to write BBCode, for example, check out the
 [Text::Markup::Bbcode][bb] page. You'll see that such files need the
-`bb` or `bcode` extension → [example.bb](example.bb). Check out the
+`bb` or `bcode` extension → [example.bb](example). Check out the
 [raw page][raw] and see for yourself.
 
 [tm1]: https://metacpan.org/pod/Text::Markup
@@ -50,7 +50,12 @@ you want to write BBCode, for example, check out the
 [bb]: https://metacpan.org/pod/Text::Markup::Bbcode
 [raw]: ../raw/example.bb
 
+The default markup language is Markdown. Thus, if you don't provide
+an extension, `.md` is going to be used.
+
 Development
 -----------
 
 There's a [TODO](todo.md) list.
+
+There's a document on [naming things](naming.md).

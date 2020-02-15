@@ -87,7 +87,7 @@ After calling C<delete_page>, the following C<git> commands are executed:
 sub delete_page {
   my ($self, $id) = @_;
   $self->SUPER::delete_page($id);
-  $self->repo->command_noisy('rm', $self->page_filename($id));
+  $self->repo->command_noisy('rm', scalar($self->page_filename($id)));
   $self->repo->command_noisy('commit', "--message=Delete $id");
 }
 

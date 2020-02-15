@@ -21,11 +21,12 @@ $ENV{ONA_MUSI_PAGES_DIR} = "test-$test/pages";
 $ENV{ONA_MUSI_HTML_DIR} = "test-$test/html";
 $ENV{ONA_MUSI_LOG_FILE} = "test-$test/changes.log";
 
-$t->app->storage->write_page('test', 'this is a test');
+$t->app->storage->write_page('test', undef, 'this is a test');
 
 ok(-f "test-$test/pages/test.md", "file was written");
 
-is($t->app->storage->read_page('test'), 'this is a test', "file was read");
+my $text = $t->app->storage->read_page('test');
+is($text, 'this is a test', "file was read");
 
 $t->app->storage->cache_page('test', 'this is cached');
 
@@ -81,7 +82,7 @@ $t = Test::Mojo->new('OnaMusi', {
   cache_dir => "test-$test/html-x",
   log_file => "test-$test/changes-x.log" });
 
-$t->app->storage->write_page('test-x', 'this is a test');
+$t->app->storage->write_page('test-x', 'md', 'this is a test');
 
 ok(-f "test-$test/pages-x/test-x.md", "file was written");
 

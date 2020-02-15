@@ -52,7 +52,7 @@ directly, as raw text.
 sub raw {
   my $c = shift;
   my $text = $c->storage->read_page($c->param('id'));
-  $c->render(text => $text, format => 'text');
+  $c->render(text => $text, format => 'txt');
 }
 
 =item C<view>
@@ -78,9 +78,7 @@ sub view {
     $html =~ s/<\/?(html|body|head|meta .*)>\s*//g;
     $c->render(template => 'view', content => $html);
   } else {
-    my $url = $c->url_for("/edit/$id");
-    $html = qq{<p>This page does not exist but you can <a href="$url">create it</a> now, if you want.};
-    $c->render(template => 'view', content => $html, status => 404);
+    $c->render(template => 'empty', id => $id, status => 404);
   }
 }
 

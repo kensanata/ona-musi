@@ -1,8 +1,7 @@
 TODO
 ====
 
-- fixing issues of file names in recent changes
-- fixing the filter form of recent changes
+- adding more fields to the edit form
 - extracting recent changes from git log
 - page history
 - rollback
@@ -10,4 +9,4 @@ TODO
 - journal pages
 - banned regular expressions
 - usernames and passwords
-
+- switching languages

@@ -16,8 +16,8 @@
 
 =head1 OnaMusi::Controller::Edit
 
-Ona Musi is a wiki. This class is a L<Mojolicious::Controller> and provides two
-actions:
+Ona Musi is a wiki. This class is a L<Mojolicious::Controller> and provides the
+following actions:
 
 =over
 
@@ -33,13 +33,17 @@ use B;
 This reads the page named by the C<id> parameter from storage and uses the
 C<edit.html.ep> template to allow users to edit it.
 
+The C<type> parameter is used to suggest an extension for new pages. The default
+is C<md>. This comes from the C<empty.html.ep> template. If the page already
+exists, the C<type> you provide is ignored and the actual C<type> is returned.
+
 =cut
 
 sub edit {
   my $c = shift;
   my $id = $c->param('id');
-  my $text = $c->storage->read_page($id);
-  $c->render(template => 'edit', content => $text);
+  my ($text, $type) = $c->storage->read_page($id, $c->param('type'));
+  $c->render(template => 'edit', content => $text, type => $type);
 }
 
 
@@ -63,11 +67,36 @@ This writes the page named by the C<id> parameter to storage. It's content is
 determined by the C<content> parameter. The user is then redirected to the
 C<view> action. See L<OnaMusi::Controller::View>.
 
+Parameters expected:
+
+=over
+
+=item C<id> is the page id
+
+=item C<type> is the file extension to use for new pages, that is: it is only
+used if there is no revision (and it defaults to C<md>)
+
+=item C<content> is the new page content
+
+=item C<revision> is the revision being edited, useful for automatic merging of
+changes
+
+=item C<minor> indicates a "minor" change; this usually means that such changes
+should not show up in RSS feeds or get sent to subscribers via mail and the like
+
+=item C<author> is the name of the author making the change
+
+=item C<summary> is the summary to provide for the change; it's shown in the
+list of changes
+
+=back
+
 =cut
 
 sub save {
   my $c = shift;
   my $id = $c->param('id');
+  my $type = $c->param('type');
   my $text = $c->param('content');
   my $revision = $c->param('revision');
   my $minor = $c->param('minor') ? 1 : 0;
@@ -77,7 +106,7 @@ sub save {
   my $change = OnaMusi::Change->new(
     ts => time, id => $id, revision => $revision, minor => $minor,
     author => $author, code => code($c), summary => $summary);
-  $c->storage->write_page($id, $text, $change);
+  $c->storage->write_page($id, $type, $text, $change);
   $c->redirect_to('view', id => $id);
 }
 

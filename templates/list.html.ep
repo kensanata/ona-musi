@@ -6,4 +6,5 @@
 % }
 </ul>
 <hr>
+<%= link_to url_for('changes')->to_abs => begin %>Changes<% end %>
 <%= link_to url_for('home')->to_abs => begin %>Home<% end %>

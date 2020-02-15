@@ -93,56 +93,72 @@ sub pages {
   if (opendir my $d, $self->pages_dir) {
     # skip dot files and Emacs backup files, without extensions
     @ids = sort
-	map { s/\.[a-z]+$//; $_ }
+	map { s/\.[a-z]+$//; $_ } # strip the extension
     	grep { $_ !~ /^\./ and $_ !~ /~$/ } readdir $d;
   }
   return \@ids;
 }
 
-sub page_filename {
-  my ($self, $id) = @_;
-  my $dir = $self->pages_dir;
-  $id =~ s/^\.+//; # strip leading dots
-  return "$dir/$id" if -r "$dir/$id"; # return exact matches
-  for (glob "$dir/$id.*") { # find matches with an extension
-    return $_ if /$dir\/$id\.[a-z]+$/ and -f;
-  }
-  my $original_id = $id; # make a copy for later
-  if ($id =~ s/\.[a-z]+$//) { # perhaps if we strip the extension
-    return "$dir/$id" if -r "$dir/$id"; # return exact matches
-    for (glob "$dir/$id.*") { # find matches with an extension
-      return $_ if /$dir\/$id\.[a-z]+$/ and -f;
+sub find_filename {
+  my ($self, $dir, $id) = @_;
+  for (glob "$dir/$id.*") {
+    if (/^$dir\/$id\.([a-z]+)$/) {
+      return $_, $1 if wantarray;
+      return $_;
     }
-    return "$dir/$original_id"; # a new file with an extension
   }
-  return "$dir/$id.md"; # if it doesn't have an extension, make it markdown
+  return "$dir/$id.md", 'md' if wantarray;
+  return "$dir/$id.md"; # default
+}
+
+=item C<page_filename>
+
+Get a filename for the page. C<id> is the page id, C<type> is the optional file
+extension. When creating a new page, you need to supply it. Otherwise, the
+C<page_dir> is searched for a file matching the C<id> and an extension of lower
+case ASCII characters (a-z).
+
+=cut
+
+sub page_filename {
+  my ($self, $id, $type) = @_;
+  my $dir = $self->pages_dir;
+  return "$dir/$id.$type", $type if $type and wantarray;
+  return "$dir/$id.$type" if $type;
+  return $self->find_filename($dir, $id);
 }
 
 sub keep_name {
-  my ($self, $id) = @_;
-  $id =~ s/^\.+//; # strip leading dots
-  $id =~ s/\.[a-z]+$//; # strip the extension
-  return $self->keep_dir . "/$id";
+  my ($self, $id, $type) = @_;
+  $type ||= "md"; # the default is markdown
+  my $dir = $self->keep_dir;
+  return "$dir/$id.$type";
 }
 
 sub cache_filename {
   my ($self, $id) = @_;
-  $id =~ s/^\.+//; # strip leading dots
-  $id =~ s/\.[a-z]+$//; # strip the extension
-  return $self->cache_dir . "/$id.html"; # use HTML
+  my $dir = $self->cache_dir;
+  return "$dir/$id.html";
 }
 
 =item C<read_page>
 
-Get the content of a page.
+Get the content of a page. C<id> is the page id. C<type> is the extension to use
+if no file is found. If you're interested, call this method in list context and
+it will return both C<text> and the actual C<type>. In case a page already
+exists with a different type, the actual type will be returned!
 
 =cut
 
 sub read_page {
-  my ($self, $id) = @_;
-  my $filename = $self->page_filename($id);
-  return read_text($filename) if -r $filename;
-  return ""; # this is shown for new pages
+  my ($self, $id, $new_type) = @_;
+  my ($filename, $type) = $self->page_filename($id); # override type!
+  if (-r $filename) {
+    return read_text($filename), $type if wantarray;
+    return read_text($filename);
+  }
+  return "", $new_type || "md" if wantarray;
+  return ""; # this the default content for new pages
 }
 
 =item C<write_page>
@@ -151,11 +167,15 @@ Write the content of a page. When writing a page, lock it first. Also write the
 change log withing the same lock so that revisions for a page come in the right
 order.
 
+The C<type> is ignored if the (optional) L<OnaMusi::Change> has a revision. In
+other words, it is only used for new pages (and defaults to C<md>).
+
 =cut
 
 sub write_page {
-  my ($self, $id, $text, $change) = @_;
+  my ($self, $id, $type, $text, $change) = @_;
   $self->clear_cache($id);
+  $type = undef if defined $change and $change->revision;
   my $filename = $self->page_filename($id);
   mkdir $self->pages_dir, 0775;
   with_locked_file($filename, sub {

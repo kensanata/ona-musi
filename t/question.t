@@ -27,7 +27,7 @@ $t->get_ok('/')
 # templates/edit.html.ep
 $t->get_ok('/edit/home')
     ->status_is(200)
-    ->text_is('h1' => 'Edit home');
+    ->text_is('h1' => 'Edit home.md');
 
 # first save results in a question
 $t->post_ok('/page/home'

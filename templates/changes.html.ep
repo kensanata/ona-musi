@@ -62,4 +62,5 @@ Anonymous
 </div>
 </div>
 <hr>
+<%= link_to url_for('list')->to_abs => begin %>List<% end %>
 <%= link_to url_for('home')->to_abs => begin %>Home<% end %>

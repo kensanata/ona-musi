@@ -1,0 +1,43 @@
+% layout 'default';
+<h1>Create a new page</h1>
+
+<p>This page does not exist but you can
+<%= link_to url_for('edit', id => $id)->query(type => 'md') => begin %>create it<% end %>
+now, if you want.
+
+<div class="smaller">
+<p>If you prefer using a different markup language, this is what we
+can offer:
+
+<ul>
+<li><%= link_to url_for('edit', id => $id)->query(type => 'adoc') => begin %>AsciiDoc<% end %>
+(<a href="http://www.methods.co.nz/asciidoc/">Documentation</a>)
+<li><%= link_to url_for('edit', id => $id)->query(type => 'bb') => begin %>BBcode<% end %>
+(<a href="http://www.bbcode.org/">Documentation</a>)
+<li><%= link_to url_for('edit', id => $id)->query(type => 'creole') => begin %>Creole<% end %>
+(<a href="http://www.wikicreole.org/">Documentation</a>)
+<li><%= link_to url_for('edit', id => $id)->query(type => 'html') => begin %>HTML<% end %>
+(<a href="http://whatwg.org/html">Documentation</a>)
+<li><%= link_to url_for('edit', id => $id)->query(type => 'md') => begin %>Markdown<% end %>
+(<a href="http://daringfireball.net/projects/markdown/">Documentation</a>)
+<li><%= link_to url_for('edit', id => $id)->query(type => 'mmd') => begin %>MultiMarkdown<% end %>
+(<a href="http://fletcherpenney.net/multimarkdown/">Documentation</a>)
+<li><%= link_to url_for('edit', id => $id)->query(type => 'wiki') => begin %>MediaWiki<% end %>
+(<a href="http://en.wikipedia.org/wiki/Help:Contents/Editing_Wikipedia">Documentation</a>)
+<li><%= link_to url_for('edit', id => $id)->query(type => 'pod') => begin %>Pod<% end %>
+(<a href="https://perldoc.perl.org/perlpod.html">Documentation</a>)
+<li><%= link_to url_for('edit', id => $id)->query(type => 'rst') => begin %>reStructuredText<% end %>
+(<a href="http://docutils.sourceforge.net/docs/user/rst/quickref.html">Documentation</a>)
+<li><%= link_to url_for('edit', id => $id)->query(type => 'txt') => begin %>Text<% end %>
+(just … text)
+<li><%= link_to url_for('edit', id => $id)->query(type => 'textile') => begin %>Textile<% end %>
+(<a href="http://textism.com/tools/textile/">Documentation</a>)
+<li><%= link_to url_for('edit', id => $id)->query(type => 'trac') => begin %>Trac<% end %>
+(<a href="http://trac.edgewall.org/wiki/WikiFormatting">Documentation</a>)
+</ul>
+</div>	
+<hr>
+<%= link_to url_for('edit', id => $id)->to_abs => begin %>Edit<% end %>
+<%= link_to url_for('changes')->to_abs => begin %>Changes<% end %>
+<%= link_to url_for('list')->to_abs => begin %>List<% end %>
+<%= link_to url_for('home')->to_abs => begin %>Home<% end %>
