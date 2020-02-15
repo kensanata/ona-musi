@@ -7,6 +7,7 @@ use FindBin;
 BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
 
 use OnaMusi::Change;
+use OnaMusi::Filter;
 
 my $t = Test::Mojo->new('OnaMusi');
 
@@ -34,14 +35,6 @@ is($t->app->storage->cached_page('test'), 'this is cached', "cache was read");
 
 # changes
 
-my $change = OnaMusi::Change->new(
-  ts => "ts", id => "id", revision => "revision",
-  minor => "minor", author => "author", code => "code",
-  summary => "summary");
-$t->app->storage->write_change($change);
-
-ok(-f "test-$test/changes.log", "log file was written");
-
 ok(open(my $log, "<:encoding(UTF-8)", "test-$test/changes.log"), "log file was opened");
 my $fs = $t->app->storage->fs;
 my $line = <$log>;
@@ -49,13 +42,32 @@ chomp $line;
 my @data = split(/$fs/, $line);
 close($log);
 
-is($data[0], 'ts', 'change log: timestamp');
-is($data[1], 'id', 'change log: id');
-is($data[2], 'revision', 'change log: revision');
-is($data[3], '1', 'change log: minor');
-is($data[4], 'author', 'change log: author');
-is($data[5], 'code', 'change log: code');
-is($data[6], 'summary', 'change log: summary');
+ok($data[0] > time - 10, 'change log: timestamp');
+is($data[1], 'test', 'change log: id');
+is($data[2], '1', 'change log: revision');
+is($data[3], '0', 'change log: minor');
+is($data[4], 'Anonymous', 'change log: author');
+is($data[5], undef, 'change log: code');
+is($data[6], undef, 'change log: summary');
+
+# add a complete change entry and redo it all
+
+my $change = OnaMusi::Change->new(
+  ts => "ts", id => "id", revision => "revision",
+  minor => "minor", author => "author", code => "code",
+  summary => "summary");
+$t->app->storage->write_change($change);
+
+my $filter = OnaMusi::Filter->new(id => "id", minor => 1);
+$change = $t->app->storage->read_changes($filter)->[0];
+
+ok($data[0] > time - 10, 'change log: timestamp');
+is($change->id, 'id', 'change log: id');
+is($change->revision, 'revision', 'change log: revision');
+is($change->minor, '1', 'change log: minor');
+is($change->author, 'author', 'change log: author');
+is($change->code, 'code', 'change log: code');
+is($change->summary, 'summary', 'change log: summary');
 
 delete $ENV{ONA_MUSI_PAGES_DIR};
 delete $ENV{ONA_MUSI_HTML_DIR};
@@ -90,23 +102,17 @@ ok(! -e "test-$test/html-x/test-x.html", "cache was deleted");
 
 # changes
 
-$t->app->storage->write_change($change);
+ok(-f "test-$test/changes-x.log", "log file x was written");
 
-ok(-f "test-$test/changes-x.log", "log file was written");
+$filter = OnaMusi::Filter->new(id => "test-x", minor => 0);
+$change = $t->app->storage->read_changes($filter)->[0];
 
-ok(open($log, "<:encoding(UTF-8)", "test-$test/changes-x.log"), "log file was opened");
-$fs = $t->app->storage->fs;
-$line = <$log>;
-chomp $line;
-@data = split(/$fs/, $line);
-close($log);
-
-is($data[0], 'ts', 'change log: timestamp');
-is($data[1], 'id', 'change log: id');
-is($data[2], 'revision', 'change log: revision');
-is($data[3], '1', 'change log: minor');
-is($data[4], 'author', 'change log: author');
-is($data[5], 'code', 'change log: code');
-is($data[6], 'summary', 'change log: summary');
+ok($data[0] > time - 10, 'change log: timestamp');
+is($change->id, 'test-x', 'change log: id');
+is($change->revision, 1, 'change log: revision');
+is($change->minor, 0, 'change log: minor');
+is($change->author, 'Anonymous', 'change log: author');
+is($change->code, '', 'change log: code');
+is($change->summary, '', 'change log: summary');
 
 done_testing;

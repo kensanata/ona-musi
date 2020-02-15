@@ -1,9 +1,9 @@
 TODO
 ====
 
-- extracting recent changes from log file
+- fixing issues of file names in recent changes
+- fixing the filter form of recent changes
 - extracting recent changes from git log
-- displaying changes template
 - page history
 - rollback
 - tags

@@ -1,0 +1,65 @@
+% layout 'default';
+<div id="changes">
+	<h1>Changes</h1>
+	<form id="filter" action="/changes">
+		<strong>Filter</strong><br>
+		<input type="checkbox" id="minor" name="minor" <%= $filter->minor ? "checked" : "" %>>
+		<label for="minor">include minor changes</label><br>
+		<input type="checkbox" id="all" name="all" <%= $filter->all ? "checked" : "" %>>
+		<label for="all">list all changes (not just the last one)</label><br>
+		<label for="id" class="wide">by page name </label>
+		<input type="text" class="wide" id="name" name="id" value="<%= $filter->id %>"><br>
+		<label for="author" class="wide">by author name </label>
+		<input type="text" class="wide" id="author" name="author" value="<%= $filter->author %>"><br>
+		<label>limit to <input type="number" class="narrow" name="n" value="<%= $filter->n %>"> items</label><br>
+		<input type="submit" value="OK">
+	</form>
+
+% my @colours = qw(red orange yellow green blue indigo violet white);
+% use POSIX qw(strftime);
+% my $day_intro;
+% for my $change (@$changes) {
+%   my $day = strftime "%F", gmtime $change->ts;
+%   my $time = strftime "%R", gmtime $change->ts;
+%   if (not $day_intro) {
+<h2><%= $day %></h2>
+<ul id="items">
+%   } elsif ($day ne $day_intro) {
+</ul>
+<h2><%= $day %></h2>
+<ul id="items">
+%   }
+% $day_intro = $day;
+<li><%= $time %>
+(<a href="/history/<%= $change->id %>">history</a>)
+%   if ($change->revision) {
+(<a href="/diff/<%= $change->id %>/<%= $change->revision + 1 %>">diff</a>)
+%   }
+<a href="/view/<%= $change->id %>/<%= $change->revision + 1 %>"><%= $change->id %></a> …
+%   if ($change->author) {
+<a href="/view/<%= $change->author %>"><%= $change->author %></a>
+%   } elsif ($change->code) {
+<span class="ip-code">
+%     for my $c (split //, $change->code) {
+<span class="<%= $colours[$c] %>"><%= $c %></span>\
+%     }
+</span>
+%   } else {
+Anonymous
+%   }
+%   if ($change->summary) {
+– <%= $change->summary %>
+%   }
+%   if ($change->minor) {
+(minor)
+%   }
+</li>
+% }
+</ul>
+% if (@$changes == 0) {
+<p><strong>There are no changes.</strong></p>
+% }
+</div>
+</div>
+<hr>
+<%= link_to url_for('home')->to_abs => begin %>Home<% end %>

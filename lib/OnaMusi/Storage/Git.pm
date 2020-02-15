@@ -63,8 +63,8 @@ See L<Git> for the module handling the calls to C<git>.
 =cut
 
 sub write_page {
-  my ($self, $id, $text) = @_;
-  $self->SUPER::write_page($id, $text);
+  my ($self, $id, @rest) = @_;
+  $self->SUPER::write_page($id, @rest);
   $self->repo->command_noisy('init') unless -d $self->pages_dir . "/.git";
   $self->repo->command_noisy('add', $self->pages_dir);
   $self->repo->command_noisy('commit', "--message=Edit $id");

@@ -69,10 +69,14 @@ sub save {
   my $c = shift;
   my $id = $c->param('id');
   my $text = $c->param('content');
+  my $revision = $c->param('revision');
+  my $minor = $c->param('minor') ? 1 : 0;
+  my $author = $c->param('author');
+  my $summary = $c->param('summary');
   $text =~ s/\r\n/\n/g; # use regular EOL convention
   my $change = OnaMusi::Change->new(
-    ts => time, id => $id,
-    code => code($c));
+    ts => time, id => $id, revision => $revision, minor => $minor,
+    author => $author, code => code($c), summary => $summary);
   $c->storage->write_page($id, $text, $change);
   $c->redirect_to('view', id => $id);
 }

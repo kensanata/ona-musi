@@ -37,6 +37,10 @@ number of edits made to a page. The first revision is number 1.
 
 =item C<summary> is the single-line summary provided for the change, if any.
 
+=item C<kept> is ignored when writing a change; when reading changes it
+indicates that the kept version of the file is available and thus diffs or
+rollbacks are possible.
+
 =back
 
 =cut
@@ -46,10 +50,11 @@ use Mojo::Base -base;
 
 has 'ts';
 has 'id';
-has 'revision';
-has 'minor';
-has 'author';
+has 'revision' => 0;
+has 'minor' => 0;
+has 'author' => 'Anonymous';
 has 'code';
 has 'summary';
+has 'kept' => 0;
 
 1;

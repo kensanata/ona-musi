@@ -27,6 +27,11 @@ C<html> is the directory where cached HTML is stored.
 The key C<cache_dir> in the config file can be used to change it.
 The environment variable C<ONA_MUSI_HTML_DIR> can be used to override it.
 
+C<keep> is the directory where kept pages are stored.
+These are the older versions of page files.
+The key C<keep_dir> in the config file can be used to change it.
+The environment variable C<ONA_MUSI_KEEP_DIR> can be used to override it.
+
 C<changes.log> is the file where changes are logged.
 The key C<log_file> in the config file can be used to change it.
 The environment variable C<ONA_MUSI_LOG_FILE> can be used to override it.
@@ -40,10 +45,14 @@ use Mojo::Base -base;
 use Mojo::IOLoop;
 use Modern::Perl '2018';
 use File::Slurper qw(read_text write_text);
+use File::ReadBackwards;
+use OnaMusi::Change;
 
+has 'log';
 has 'config';
 has 'pages_dir' => sub { $ENV{ONA_MUSI_PAGES_DIR} or shift->config->{pages_dir} or "pages" };
 has 'cache_dir' => sub { $ENV{ONA_MUSI_HTML_DIR} or shift->config->{cache_dir} or "html" };
+has 'keep_dir' => sub { $ENV{ONA_MUSI_KEEP_DIR} or shift->config->{keep_dir} or "keep" };
 has 'log_file' => sub { $ENV{ONA_MUSI_LOG_FILE} or shift->config->{log_file} or "changes.log" };
 has 'fs' => "\x1e"; # ASCII field separator
 
@@ -109,6 +118,13 @@ sub page_filename {
   return "$dir/$id.md"; # if it doesn't have an extension, make it markdown
 }
 
+sub keep_name {
+  my ($self, $id) = @_;
+  $id =~ s/^\.+//; # strip leading dots
+  $id =~ s/\.[a-z]+$//; # strip the extension
+  return $self->keep_dir . "/$id";
+}
+
 sub cache_filename {
   my ($self, $id) = @_;
   $id =~ s/^\.+//; # strip leading dots
@@ -131,7 +147,9 @@ sub read_page {
 
 =item C<write_page>
 
-Write the content of a page.
+Write the content of a page. When writing a page, lock it first. Also write the
+change log withing the same lock so that revisions for a page come in the right
+order.
 
 =cut
 
@@ -139,23 +157,43 @@ sub write_page {
   my ($self, $id, $text, $change) = @_;
   $self->clear_cache($id);
   my $filename = $self->page_filename($id);
-  # needs lock
   mkdir $self->pages_dir, 0775;
-  with_locked_file($filename, sub { write_text($filename, $text) });
-  $self->write_change($change) if defined $change;
-}
-
-sub stale_cache {
-  my ($self, $cache, $page) = @_;
-  my $m1 = (stat($cache))[9] if -f $cache; # mtime
-  my $m2 = (stat($page))[9] if -f $page;   # mtime
-  return $m1 < $m2 if $m1 and $m2;
+  with_locked_file($filename, sub {
+    $change //= OnaMusi::Change->new(ts => time, id => $id);
+    $self->keep_revision($filename, $change);
+    write_text($filename, $text);
+    $self->write_change($change) if defined $change;
+  });
 }
 
 sub clear_cache {
   my ($self, $id) = @_;
   my $filename = $self->cache_filename($id);
   unlink $filename;
+}
+
+sub keep_revision {
+  my ($self, $filename, $change) = @_;
+  my $keep_dir = $self->keep_dir;
+  my $keep_file = $self->keep_name($change->id);
+  my $revision = $change->revision || $self->latest_revision($keep_file);
+  $revision++;
+  $revision++ while -e "$keep_file.~$revision~";
+  $self->log->warn("Merge not implemented: overwriting changes") if $change->revision and $revision - $change->revision > 1;
+  if ($revision > 1) {
+    write_text("$keep_file.~$revision~", read_text($filename));
+  }
+  $change->revision($revision);
+}
+
+sub latest_revision {
+  my ($self, $keep_file) = @_;
+  my $rev = 0;
+  for (<$keep_file.~*~>) {
+    next unless /^$keep_file.~(\d+)~/;
+    $rev = $1 if $1 > $rev;
+  }
+  return $rev;
 }
 
 =item C<cached_page>
@@ -170,6 +208,13 @@ sub cached_page {
   my $stale = $self->stale_cache($filename, $self->page_filename($id));
   return read_text($filename) if -r $filename and not $stale;
   return undef;
+}
+
+sub stale_cache {
+  my ($self, $cache, $page) = @_;
+  my $m1 = (stat($cache))[9] if -f $cache; # mtime
+  my $m2 = (stat($page))[9] if -f $page;   # mtime
+  return $m1 < $m2 if $m1 and $m2;
 }
 
 =item C<cached_page>
@@ -215,11 +260,46 @@ sub write_change {
 		   $change->id,
 		   $change->revision,
 		   $change->minor ? 1 : 0,
-		   $change->author,
-		   $change->code,
-		   $change->summary) . "\n";
+		   $change->author || "",
+		   $change->code || "",
+		   $change->summary || "") . "\n";
     close($fh);
   };
+}
+
+=item C<read_changes>
+
+Read a list of L<OnaMusi::Change> items from the log file.
+Use L<OnaMusi::Filter> to filter them.
+
+The problem with reading the changes from a log file is that they are in the
+wrong order. This is why we need L<File::ReadBackwards>.
+
+=cut
+
+sub read_changes {
+  my ($self, $filter) = @_;
+  my @changes;
+  my %seen;
+  my $log = File::ReadBackwards->new($self->log_file) or return ();
+  while ($_ = $log->readline) {
+    last if not defined;
+    chomp;
+    my ($ts, $id, $revision, $minor, $author, $code, $summary) = split $self->fs;
+    next if $filter->id and $filter->id ne $id;
+    next if not $filter->all and $seen{$id};
+    next if $filter->minor and not $minor;
+    next if $filter->author and $filter->author ne $author;
+    $seen{$id} = 1 if not $filter->all; # only fill it when necessary
+    my $keep_file = $self->keep_name($id);
+    my $change = OnaMusi::Change->new(
+      ts => time, id => $id, revision => $revision, minor => $minor,
+      author => $author, code => $code, summary => $summary,
+      kept => -e "$keep_file.~$revision~");
+    unshift(@changes, $change);
+    last if $filter->n and @changes > $filter->n;
+  }
+  return \@changes;
 }
 
 =back

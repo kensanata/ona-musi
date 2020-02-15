@@ -58,7 +58,7 @@ sub startup {
   eval "require $config->{markup}";
 
   # Helper to lazy initialize and store our model object.
-  $self->helper(storage => sub { state $storage = $config->{storage}->new(config => $config) });
+  $self->helper(storage => sub { state $storage = $config->{storage}->new(config => $config, log => $self->app->log) });
   $self->helper(markup => sub { state $render = $config->{markup}->new(config => $config) });
   $self->helper(question => sub { require OnaMusi::Questions; state $question = OnaMusi::Questions->new($config) });
 
@@ -66,6 +66,7 @@ sub startup {
   my $r = $self->routes;
   $r->get('/' => sub {my $c = shift; $c->redirect_to('/page/home')})->name('home');
   $r->get('/list')->to(controller => 'search', action => 'list')->name('list');
+  $r->get('/changes')->to(controller => 'changes', action => 'html')->name('changes');
   $r->get('/html/#id')->to(controller => 'view', action => 'html')->name('html');
   $r->get('/raw/#id')->to(controller => 'view', action => 'raw')->name('raw');
   $r->get('/page/#id')->to(controller => 'view', action => 'view')->name('view');

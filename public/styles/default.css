@@ -117,6 +117,19 @@ h3 {
     }
 }
 
+/* Changes: Filter */
+
+#filter label.wide { display:inline-block; width: 20ex; border: none;}
+#filter input.wide {
+    display:inline-block;
+    width: 20ex;
+    border-top-style: hidden;
+    border-right-style: hidden;
+    border-left-style: hidden;
+    font-weight: bold;
+}
+#filter input.narrow { display:inline-block; width: 5ex; }
+
 /* Color codes for IP number replacements. */
 
 .red {
