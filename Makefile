@@ -8,3 +8,6 @@ test: clean
 
 clean:
 	rm -rf test-*
+
+modules:
+	find lib -name '*.pm' -exec grep '^use\b' {} ';' | sort | uniq
