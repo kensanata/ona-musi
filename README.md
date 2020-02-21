@@ -6,12 +6,14 @@ See the [introduction](pages/intro.md) for more information.
 Dependencies
 ------------
 
-You probably need to install some Perl modules! Here are the Debian
-packages you probably need:
+You probably need to install some Perl modules! Here is a list of
+Debian packages the provide them:
 
+* `libmodern-perl-perl` for `Modern::Perl`
 * `libmojolicious-perl` for `Mojolicious`
 * `libtext-markup-perl` for `Text::Markup`
 * `libfile-slurper-perl` for `File::Slurper`
+* `libfile-readbackwards-perl` for `File::ReadBackwards`
 
 Quickstart
 ----------
