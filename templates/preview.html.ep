@@ -1,9 +1,9 @@
 % layout 'default';
-<h1>Preview <%= $id %>.<%= $type %></h1>
-<p>These are unsaved changes!
+<p>Preview for <%= $id %>.<%= $type %>: <strong>These are unsaved changes!</strong>
 <hr>
 %== $output
 <hr>
+<h1>Edit <%= $id %>.<%= $type %></h1>
 %= form_for save => begin
 %= hidden_field id => $id
 %= hidden_field type => $type
@@ -20,6 +20,7 @@
 % end
 
 %= button_to Delete => 'delete'
+%= button_to Cancel => 'view'
 
 <hr>
 <%= link_to url_for('view', id => $id)->to_abs => begin %>View<% end %>

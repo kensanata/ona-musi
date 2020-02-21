@@ -8,12 +8,16 @@
 %= text_area summary => ''
 %= label_for author => 'Your name'
 %= text_field author => $author
+<br>
 %= label_for minor => 'Minor change'
 %= check_box minor => 0
 <br>
 %= submit_button "Preview", formaction => $preview
 %= submit_button "Save"
 % end
+
+%= button_to Delete => 'delete'
+%= button_to Cancel => 'view'
 
 <hr>
 <%= link_to url_for('view', id => $id)->to_abs => begin %>View<% end %>
