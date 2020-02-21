@@ -43,7 +43,7 @@ languages, [search CPAN for the Text::Markup distribution][tm2]. If
 you want to write BBCode, for example, check out the
 [Text::Markup::Bbcode][bb] page. You'll see that such files need the
 `bb` or `bcode` extension → [example.bb](example). Check out the
-[raw page][raw] and see for yourself.
+[raw page](/raw/example) and see for yourself.
 
 [tm1]: https://metacpan.org/pod/Text::Markup
 [tm2]: https://metacpan.org/search?q=distribution%3AText-Markup
