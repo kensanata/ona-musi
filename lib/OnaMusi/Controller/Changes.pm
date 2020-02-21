@@ -96,7 +96,11 @@ renders the resulting HTML. The cache is not used.
 
 sub html {
   my $c = shift;
-  my $filter = OnaMusi::Filter->new;
+  my $all = $c->param('all');
+  my $minor = $c->param('minor');
+  my $id = $c->param('id');
+  my $author = $c->param('author');
+  my $filter = OnaMusi::Filter->new(all => $all, minor => $minor, id => $id, author => $author);
   my $changes = $c->storage->read_changes($filter);
   $c->render(template => 'changes', filter => $filter, changes => $changes);
 }

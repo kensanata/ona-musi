@@ -21,7 +21,7 @@
 % end
 
 <hr>
-<%= link_to url_for('view', id => $id)->to_abs => begin %>View<% end %>
-<%= link_to url_for('changes')->to_abs => begin %>Changes<% end %>
-<%= link_to url_for('list')->to_abs => begin %>List<% end %>
-<%= link_to url_for('home')->to_abs => begin %>Home<% end %>
+%= link_to View => 'view', id => $id
+%= link_to Changes => 'changes'
+%= link_to List => 'list'
+%= link_to Home => 'home'

@@ -3,9 +3,9 @@
 	<h1>Changes</h1>
 	<form id="filter" action="/changes">
 		<strong>Filter</strong><br>
-		<input type="checkbox" id="minor" name="minor" <%= $filter->minor ? "checked" : "" %>>
+		<input type="checkbox" id="minor" name="minor" value="1" <%= $filter->minor ? "checked" : "" %>>
 		<label for="minor">include minor changes</label><br>
-		<input type="checkbox" id="all" name="all" <%= $filter->all ? "checked" : "" %>>
+		<input type="checkbox" id="all" name="all" value="1" <%= $filter->all ? "checked" : "" %>>
 		<label for="all">list all changes (not just the last one)</label><br>
 		<label for="id" class="wide">by page name </label>
 		<input type="text" class="wide" id="name" name="id" value="<%= $filter->id %>"><br>
@@ -31,13 +31,18 @@
 %   }
 % $day_intro = $day;
 <li><%= $time %>
-(<a href="/history/<%= $change->id %>">history</a>)
+(<%= link_to history => url_for('changes')->query(id => $change->id) %>)
 %   if ($change->revision) {
-(<a href="/diff/<%= $change->id %>/<%= $change->revision + 1 %>">diff</a>)
+(<%= link_to diff => url_for('diff', id => $change->id, to => $change->revision + 1) %>)
 %   }
-<a href="/view/<%= $change->id %>/<%= $change->revision + 1 %>"><%= $change->id %></a> …
+%   if ($change->current) {
+%= link_to $change->id => url_for 'view', id => $change->id
+%   } else {
+%= link_to $change->id => url_for 'revision', id => $change->id, revision => $change->revision + 1
+%   }
+…
 %   if ($change->author) {
-<a href="/view/<%= $change->author %>"><%= $change->author %></a>
+%= link_to $change->author => url_for 'view', id => $change->author
 %   } elsif ($change->code) {
 <span class="ip-code">
 %     for my $c (split //, $change->code) {
@@ -62,5 +67,6 @@ Anonymous
 </div>
 </div>
 <hr>
-<%= link_to url_for('list')->to_abs => begin %>List<% end %>
-<%= link_to url_for('home')->to_abs => begin %>Home<% end %>
+%= link_to Changes => 'changes'
+%= link_to List => 'list'
+%= link_to Home => 'home'

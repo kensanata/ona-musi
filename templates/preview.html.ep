@@ -1,5 +1,5 @@
 % layout 'default';
-<p>Preview for <%= $id %>.<%= $type %>: <strong>These are unsaved changes!</strong>
+Preview for</p> <%= $id %>.<%= $type %>: <strong>These are unsaved changes!</strong>
 <hr>
 %== $output
 <hr>
@@ -15,7 +15,7 @@
 %= label_for minor => 'Minor change'
 %= check_box minor => $minor
 <br>
-%= submit_button "Preview", formaction => $preview
+%= submit_button "Preview", formaction => url_for('preview', id => $id)
 %= submit_button "Save"
 % end
 
@@ -23,7 +23,7 @@
 %= button_to Cancel => 'view'
 
 <hr>
-<%= link_to url_for('view', id => $id)->to_abs => begin %>View<% end %>
-<%= link_to url_for('changes')->to_abs => begin %>Changes<% end %>
-<%= link_to url_for('list')->to_abs => begin %>List<% end %>
-<%= link_to url_for('home')->to_abs => begin %>Home<% end %>
+%= link_to View => 'view', id => $id
+%= link_to Changes => 'changes'
+%= link_to List => 'list'
+%= link_to Home => 'home'

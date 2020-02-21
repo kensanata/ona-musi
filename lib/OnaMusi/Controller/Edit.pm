@@ -46,8 +46,7 @@ sub edit {
   my $id = $c->param('id');
   my $author = $c->param('author');
   my ($text, $type) = $c->storage->read_page($id, $c->param('type'));
-  my $preview = $c->url_for('preview', id => $id);
-  $c->render(template => 'edit', content => $text, type => $type, preview => $preview,
+  $c->render(template => 'edit', content => $text, type => $type,
 	     author => $author);
 }
 
@@ -68,7 +67,6 @@ sub preview {
   my $id = $c->param('id');
   my $text = $c->param('content');
   my $type = $c->param('type');
-  my $preview = $c->url_for('preview', id => $id);
   my $author = $c->param('author');
   my $minor = $c->param('minor');
   die "Invalid type $type" unless $type =~ /^[a-z]+$/;
@@ -77,7 +75,7 @@ sub preview {
   my $html = $c->markup->parse(file => $file);
   $html =~ s/<\/?(html|body|head|meta .*)>\s*//g;
   utf8::decode($html);
-  $c->render(template => 'preview', content => $text, type => $type, preview => $preview,
+  $c->render(template => 'preview', content => $text, type => $type,
 	     author => $author, minor => $minor, output => $html);
 }
 

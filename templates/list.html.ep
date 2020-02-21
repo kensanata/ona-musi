@@ -2,9 +2,9 @@
 <h1>All Pages</h1>
 <ul>
 % for my $id (@$ids) {
-<li><%= link_to url_for('view', id => $id)->to_abs => begin %><%= $id %><% end %></li>
+<li><%= link_to url_for('view', id => $id) => begin %><%= $id %><% end %></li>
 % }
 </ul>
 <hr>
-<%= link_to url_for('changes')->to_abs => begin %>Changes<% end %>
-<%= link_to url_for('home')->to_abs => begin %>Home<% end %>
+%= link_to Changes => 'changes'
+%= link_to Home => 'home'

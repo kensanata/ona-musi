@@ -56,5 +56,6 @@ has 'author' => 'Anonymous';
 has 'code';
 has 'summary';
 has 'kept' => 0;
+has 'current';
 
 1;

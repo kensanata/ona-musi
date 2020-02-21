@@ -1,7 +1,7 @@
 % layout 'default';
 %== $content
 <hr>
-<%= link_to url_for('edit', id => $id)->to_abs => begin %>Edit<% end %>
-<%= link_to url_for('changes')->to_abs => begin %>Changes<% end %>
-<%= link_to url_for('list')->to_abs => begin %>List<% end %>
-<%= link_to url_for('home')->to_abs => begin %>Home<% end %>
+%= link_to Edit => 'edit', id => $id
+%= link_to Changes => 'changes'
+%= link_to List => 'list'
+%= link_to Home => 'home'

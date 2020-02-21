@@ -70,6 +70,8 @@ sub startup {
   $r->get('/html/#id')->to(controller => 'view', action => 'html')->name('html');
   $r->get('/raw/#id')->to(controller => 'view', action => 'raw')->name('raw');
   $r->get('/page/#id')->to(controller => 'view', action => 'view')->name('view');
+  $r->get('/page/#id/:revision')->to(controller => 'view', action => 'view')->name('revision');
+  $r->get('/page/#id/diff/:revision')->to(controller => 'view', action => 'diff')->name('diff');
   $r->get('/edit/#id')->to(controller => 'edit', action => 'edit')->name('edit');
 
   my $question_answered = $r->under(sub { $self->app->question->ask(@_) });

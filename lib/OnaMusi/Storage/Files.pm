@@ -308,14 +308,16 @@ sub read_changes {
     my ($ts, $id, $revision, $minor, $author, $code, $summary) = split $self->fs;
     next if $filter->id and $filter->id ne $id;
     next if not $filter->all and $seen{$id};
-    next if $filter->minor and not $minor;
+    next if $minor and not $filter->minor;
     next if $filter->author and $filter->author ne $author;
-    $seen{$id} = 1 if not $filter->all; # only fill it when necessary
+    my $current = 0;
+    $current = $seen{$id} = 1 if not $seen{$id};
     my $keep_file = $self->keep_name($id);
+    my $kept = -e "$keep_file.~$revision~";
     my $change = OnaMusi::Change->new(
       ts => $ts, id => $id, revision => $revision, minor => $minor,
       author => $author, code => $code, summary => $summary,
-      kept => -e "$keep_file.~$revision~");
+      kept => $kept, current => $current);
     unshift(@changes, $change);
     last if $filter->n and @changes > $filter->n;
   }
