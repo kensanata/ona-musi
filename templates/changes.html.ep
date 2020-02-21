@@ -18,7 +18,7 @@
 % my @colours = qw(red orange yellow green blue indigo violet white);
 % use POSIX qw(strftime);
 % my $day_intro;
-% for my $change (@$changes) {
+% for my $change (reverse @$changes) {
 %   my $day = strftime "%F", gmtime $change->ts;
 %   my $time = strftime "%R", gmtime $change->ts;
 %   if (not $day_intro) {
