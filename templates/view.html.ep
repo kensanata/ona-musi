@@ -1,5 +1,5 @@
 % layout 'default';
-<%== $content =%>
+%== $content
 <hr>
 <%= link_to url_for('edit', id => $id)->to_abs => begin %>Edit<% end %>
 <%= link_to url_for('changes')->to_abs => begin %>Changes<% end %>

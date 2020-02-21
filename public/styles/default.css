@@ -72,6 +72,7 @@ pre {
 /* Edit pages */
 
 textarea { width: 100%; height: 20ex; }
+textarea[name="summary"] { width: 100%; height: 2.5em; }
 
 form {
     display: inline;

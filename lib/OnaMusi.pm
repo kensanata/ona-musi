@@ -75,6 +75,7 @@ sub startup {
   my $question_answered = $r->under(sub { $self->app->question->ask(@_) });
   $question_answered->delete('/page/#id')->to(controller => 'edit', action => 'delete')->name('delete');
   $question_answered->post('/page/#id')->to(controller => 'edit', action => 'save')->name('save');
+  $r->post('/page/#id/preview')->to(controller => 'edit', action => 'preview')->name('preview');
 }
 
 1;

@@ -1,5 +1,9 @@
 % layout 'default';
-<h1>Edit <%= $id %>.<%= $type %></h1>
+<h1>Preview <%= $id %>.<%= $type %></h1>
+<p>These are unsaved changes!
+<hr>
+%== $output
+<hr>
 %= form_for save => begin
 %= hidden_field id => $id
 %= hidden_field type => $type
@@ -9,11 +13,13 @@
 %= label_for author => 'Your name'
 %= text_field author => $author
 %= label_for minor => 'Minor change'
-%= check_box minor => 0
+%= check_box minor => $minor
 <br>
 %= submit_button "Preview", formaction => $preview
 %= submit_button "Save"
 % end
+
+%= button_to Delete => 'delete'
 
 <hr>
 <%= link_to url_for('view', id => $id)->to_abs => begin %>View<% end %>

@@ -26,6 +26,8 @@ following actions:
 package OnaMusi::Controller::Edit;
 use Mojo::Base 'Mojolicious::Controller';
 use OnaMusi::Change;
+use File::Temp;
+use File::Slurper qw(write_text read_text);
 use B;
 
 =item C<edit>
@@ -42,8 +44,41 @@ exists, the C<type> you provide is ignored and the actual C<type> is returned.
 sub edit {
   my $c = shift;
   my $id = $c->param('id');
+  my $author = $c->param('author');
   my ($text, $type) = $c->storage->read_page($id, $c->param('type'));
-  $c->render(template => 'edit', content => $text, type => $type);
+  my $preview = $c->url_for('preview', id => $id);
+  $c->render(template => 'edit', content => $text, type => $type, preview => $preview,
+	     author => $author);
+}
+
+
+=item C<preview>
+
+This renders the page named by the C<id> parameter with the text specified in
+the C<text> parameter, and uses the C<edit.html.ep> template to allow users to
+edit it.
+
+The C<type> parameter is used to suggest an extension for new pages. It is
+determined by the form on the C<edit.html.ep> template.
+
+=cut
+
+sub preview {
+  my $c = shift;
+  my $id = $c->param('id');
+  my $text = $c->param('content');
+  my $type = $c->param('type');
+  my $preview = $c->url_for('preview', id => $id);
+  my $author = $c->param('author');
+  my $minor = $c->param('minor');
+  die "Invalid type $type" unless $type =~ /^[a-z]+$/;
+  my $file = File::Temp->new(SUFFIX => ".$type");
+  write_text($file, $text);
+  my $html = $c->markup->parse(file => $file);
+  $html =~ s/<\/?(html|body|head|meta .*)>\s*//g;
+  utf8::decode($html);
+  $c->render(template => 'preview', content => $text, type => $type, preview => $preview,
+	     author => $author, minor => $minor, output => $html);
 }
 
 
