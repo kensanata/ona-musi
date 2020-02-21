@@ -1,4 +1,4 @@
-# Oddmuse is a wiki engine
+# OnaMusi is a wiki engine
 # Copyright (C) 2020  Alex Schroeder <alex@gnu.org>
 #
 # This program is free software: you can redistribute it and/or modify it
