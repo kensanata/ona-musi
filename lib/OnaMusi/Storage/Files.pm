@@ -313,7 +313,7 @@ sub read_changes {
     $seen{$id} = 1 if not $filter->all; # only fill it when necessary
     my $keep_file = $self->keep_name($id);
     my $change = OnaMusi::Change->new(
-      ts => time, id => $id, revision => $revision, minor => $minor,
+      ts => $ts, id => $id, revision => $revision, minor => $minor,
       author => $author, code => $code, summary => $summary,
       kept => -e "$keep_file.~$revision~");
     unshift(@changes, $change);
